@@ -1,50 +1,56 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_state_manager/src/simple/get_state.dart';
+import 'package:get/get.dart';
 import 'package:techware/viewmodel/home_view_model.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({super.key});
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  final homeController = Get.put(HomeViewModel());
+
+  @override
+  void initState() {
+    super.initState();
+    homeController.fetchHome();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(centerTitle: true, title: Text("Techwarelab")),
-
+      appBar: AppBar(centerTitle: true, title: const Text("Techwarelab")),
       body: GetBuilder<HomeViewModel>(
-        init: HomeViewModel(),
-        didChangeDependencies: (state) {
-          state.controller!.fetchHome();
-        },
-        initState: (_) {},
         builder: (viewmodel) {
           if (viewmodel.isloading) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (viewmodel.errorMessage != null) {
             return Center(
               child: Text(
-                viewmodel.errorMessage!.message,
+                viewmodel.errorMessage?.message ?? "Something went wrong",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.red, fontSize: 16),
+                style: const TextStyle(color: Colors.red, fontSize: 16),
               ),
             );
           }
-          return viewmodel.isloading
-              ? Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                itemCount: viewmodel.homelist.length,
-                itemBuilder: (context, i) {
-                  return Container(
-                    margin: EdgeInsets.all(10),
-                    decoration: BoxDecoration(border: Border.all(width: 1)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(viewmodel.homelist[i].title),
-                    ),
-                  );
-                },
+
+          return ListView.builder(
+            itemCount: viewmodel.homelist.length,
+            itemBuilder: (context, i) {
+              return Container(
+                margin: const EdgeInsets.all(10),
+                decoration: BoxDecoration(border: Border.all(width: 1)),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(viewmodel.homelist[i].title),
+                ),
               );
+            },
+          );
         },
       ),
     );
